@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/films', { useNewUrlParser: true })
-	.then(() => console.log('database ready'))
-	.catch(err => console.log(err));
 
 const FilmSchema = new mongoose.Schema({
 	id: {
@@ -37,6 +34,7 @@ const FullFilmProjection = {
 // const kitty = new Cat({ name: 'Zildjian' });
 // kitty.save().then(() => console.log('meow'));
 
+exports.FilmSchema = FilmSchema;
 exports.FilmModel = Film;
 exports.ShortFilmProjection = ShortFilmProjection;
 exports.FullFilmProjection = FullFilmProjection;
