@@ -1,5 +1,12 @@
 # Evercode tesk task
 
+## Run App
+
+```
+npm run start - run app
+npm run test - run tests
+```
+
 ## Endpoints
 
 - Get films
