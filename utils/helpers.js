@@ -1,3 +1,9 @@
+const Logger = require('eventlogger');
+const log = new Logger({
+	source: 'FilmsApiLogs',
+	logPath: './'
+});
+
 exports.allSpecifiedGenresInDocumentFilter = (genresStrung) => {
 	const genres = genresStrung ? genresStrung.split(',') : '';
 	const genresFilter = genres ? genres.map(g => {
@@ -9,3 +15,10 @@ exports.allSpecifiedGenresInDocumentFilter = (genresStrung) => {
 };
 
 exports.delay = timeout => new Promise(resolve => setTimeout(resolve, timeout));
+
+exports.globalErrorHandler = async (error) => {
+	// await sendEmailToAdmin
+	// await etc...
+	log.error(error);
+	console.log(error);
+};

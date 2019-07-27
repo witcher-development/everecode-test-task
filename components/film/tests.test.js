@@ -3,6 +3,7 @@ const axios = require('axios');
 const { assert } = require('chai');
 
 const { FilmSchema } = require('./models');
+const { allSpecifiedGenresInDocumentFilter } = require('../../utils/helpers');
 
 mongoose.set('useCreateIndex', true);
 
@@ -120,6 +121,27 @@ describe('API response status and headers. All should return status 200 and head
 		}
 	});
 
+});
+
+describe('Helpers testing', () => {
+
+	it('Should create right query structure from genres string', () => {
+		const genresString = 'Drama,Adventure';
+		const expectedQuery = {
+			$and: [
+				{
+					genres: { $eq: 'Drama' }
+				},
+				{
+					genres: { $eq: 'Adventure' }
+				}
+			]
+		};
+
+		let query = allSpecifiedGenresInDocumentFilter(genresString);
+
+		assert.deepEqual(query, expectedQuery);
+	});
 });
 
 describe('API data and structure', () => {

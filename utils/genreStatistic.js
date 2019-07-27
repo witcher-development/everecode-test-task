@@ -1,5 +1,5 @@
 const uuid = require('uuid');
-const { delay } = require('./helpers');
+const { delay, globalErrorHandler } = require('./helpers');
 
 let backgroundProcesses = [];
 
@@ -41,7 +41,7 @@ class bgProcess {
 				return output;
 
 			} catch (e) {
-				console.log(e);
+				globalErrorHandler(e);
 			}
 		})()
 	}
@@ -76,7 +76,7 @@ exports.calculateGenreStatistic = async (genre, model, res) => {
 
 		return await newProcess.getResult;
 	} catch (e) {
-		console.log(e);
+		globalErrorHandler(e);
 	}
 
 };

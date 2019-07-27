@@ -1,7 +1,8 @@
 const axios = require('axios');
 const { FilmModel, ShortFilmProjection, FullFilmProjection } = require('./models');
 const {
-	allSpecifiedGenresInDocumentFilter
+	allSpecifiedGenresInDocumentFilter,
+	globalErrorHandler
 } = require('../../utils/helpers');
 const {
 	calculateGenreStatistic
@@ -16,6 +17,7 @@ exports.countController = async (req, res, next) => {
 		res.status(200).send({ data: count });
 	} catch (e) {
 		res.status(500).send(e.message);
+		globalErrorHandler(e);
 	}
 };
 
@@ -57,6 +59,7 @@ exports.updateController = async (req, res, next) => {
 
 	} catch (e) {
 		res.status(500).send(e.message);
+		globalErrorHandler(e);
 	}
 };
 
@@ -72,6 +75,7 @@ exports.statisticController = async (req, res, next) => {
 		res.end();
 	} catch (e) {
 		res.status(500).send(e.message);
+		globalErrorHandler(e);
 	}
 };
 
@@ -98,6 +102,7 @@ exports.getFilmsController = async (req, res, next) => {
 		res.status(200).send({ data: result });
 	} catch (e) {
 		res.status(500).send(e.message);
+		globalErrorHandler(e);
 	}
 };
 
@@ -110,5 +115,6 @@ exports.getFilmController = async (req, res, next) => {
 		res.status(200).send({ data: film })
 	} catch (e) {
 		res.status(500).send(e.message);
+		globalErrorHandler(e);
 	}
 };
