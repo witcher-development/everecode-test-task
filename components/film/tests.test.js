@@ -3,7 +3,7 @@ const axios = require('axios');
 const { assert } = require('chai');
 
 const { FilmSchema } = require('./models');
-const { allSpecifiedGenresInDocumentFilter } = require('../../utils/helpers');
+const { allSpecifiedGenresInDocumentFilter, invalidType } = require('../../utils/helpers');
 
 mongoose.set('useCreateIndex', true);
 
@@ -141,6 +141,18 @@ describe('Helpers testing', () => {
 		let query = allSpecifiedGenresInDocumentFilter(genresString);
 
 		assert.deepEqual(query, expectedQuery);
+	});
+
+	it('invalidType helper should return true when argument is not valid', () => {
+
+		assert(!invalidType('argument', 'string'));
+		assert(invalidType('argument', 'number'));
+		assert(!invalidType(undefined, 'string')); // because is not required
+
+		assert(!invalidType('argument', 'string', true));
+		assert(invalidType('argument', 'number', true));
+		assert(invalidType(undefined, 'string', true));
+
 	});
 });
 

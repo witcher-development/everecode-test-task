@@ -2,11 +2,10 @@ const axios = require('axios');
 const { FilmModel, ShortFilmProjection, FullFilmProjection } = require('./models');
 const {
 	allSpecifiedGenresInDocumentFilter,
-	globalErrorHandler
+	globalErrorHandler,
+	invalidType
 } = require('../../utils/helpers');
-const {
-	calculateGenreStatistic
-} = require('../../utils/genreStatistic');
+const { api_url, api_key } = require('../../utils/constans');
 
 exports.countController = async (req, res, next) => {
 	try {
@@ -17,18 +16,16 @@ exports.countController = async (req, res, next) => {
 		res.status(200).send({ data: count });
 	} catch (e) {
 		res.status(500).send(e.message);
-		globalErrorHandler(e);
+		await globalErrorHandler(e);
 	}
 };
 
 exports.updateController = async (req, res, next) => {
 	try {
 
-		const url = 'https://api.themoviedb.org/3';
-		const api_key = 'cb4abcaa383d8dcc239745f0cbf9f7da';
 		let pages = 20;
 
-		let genresRes = await axios.get(`${url}/genre/movie/list?api_key=${api_key}&language=en-US`);
+		let genresRes = await axios.get(`${api_url}/genre/movie/list?api_key=${api_key}&language=en-US`);
 		let genres = [];
 		genresRes.data.genres.forEach(g => {
 			genres[g.id] = g.name;
@@ -37,7 +34,7 @@ exports.updateController = async (req, res, next) => {
 		let totalAdded = 0;
 
 		for (let i = 1; i <= pages; i++) {
-			let filmsRes = await axios.get(`${url}/movie/top_rated?api_key=${api_key}&page=${i}&language=en-US`);
+			let filmsRes = await axios.get(`${api_url}/movie/top_rated?api_key=${api_key}&page=${i}&language=en-US`);
 			let films = filmsRes.data.results.map(f => {
 				f.genres = f.genre_ids.map(g => genres[g]);
 				return f;
@@ -59,38 +56,30 @@ exports.updateController = async (req, res, next) => {
 
 	} catch (e) {
 		res.status(500).send(e.message);
-		globalErrorHandler(e);
-	}
-};
-
-exports.statisticController = async (req, res, next) => {
-	try {
-
-		// res.write('Request is handling...');
-		const genre = req.query.genre;
-
-		const result = await calculateGenreStatistic(genre, FilmModel, res);
-
-		res.write(JSON.stringify({ data: result }));
-		res.end();
-	} catch (e) {
-		res.status(500).send(e.message);
-		globalErrorHandler(e);
+		await globalErrorHandler(e);
 	}
 };
 
 exports.getFilmsController = async (req, res, next) => {
 	try{
 
+		const {
+			page: pageQuery,
+			sort: sortQuery,
+			genres
+		} = req.query;
+
+		if (invalidType(pageQuery, 'number') || invalidType(sortQuery, 'number') || invalidType(genres, 'string')) {
+			throw new Error('Invalid parameter type');
+		}
+
 		const perPage = 10;
 
-		const pageQuery = +req.query.page;
 		const to = (pageQuery || 1) * 10;
 		const from = to - perPage;
 
-		const genresFilter = allSpecifiedGenresInDocumentFilter(req.query.genres);
+		const genresFilter = allSpecifiedGenresInDocumentFilter(genres);
 
-		const sortQuery = +req.query.sort;
 		const sort = sortQuery ? { title: sortQuery } : {};
 
 		const result = await FilmModel
@@ -99,10 +88,23 @@ exports.getFilmsController = async (req, res, next) => {
 			.sort(sort)
 			.skip(from).limit(perPage);
 
+		if (!result.length) {
+			throw new Error('No films found');
+		}
+
 		res.status(200).send({ data: result });
 	} catch (e) {
-		res.status(500).send(e.message);
-		globalErrorHandler(e);
+
+		let status = 500;
+
+		if (e.message === 'Invalid parameter type') {
+			status = 400;
+		} else if (e.message === 'No films found') {
+			status = 404;
+		}
+
+		res.status(status).send(e.message);
+		await globalErrorHandler(e);
 	}
 };
 
@@ -112,9 +114,21 @@ exports.getFilmController = async (req, res, next) => {
 		const id = req.params.id;
 		const film = await FilmModel.findById(id).select(FullFilmProjection);
 
+		if (film === null) {
+			throw new Error('Film with specified ID was not found');
+		}
+
 		res.status(200).send({ data: film })
 	} catch (e) {
-		res.status(500).send(e.message);
-		globalErrorHandler(e);
+
+		if (e.name === 'CastError' && e.kind === 'ObjectId') {
+			res.status(400).send('Please send ID in the ObjectId format');
+		} else if (e.message === 'Film with specified ID was not found') {
+			res.status(404).send(e.message);
+		} else {
+			res.status(500).send(e.message);
+		}
+
+		await globalErrorHandler(e);
 	}
 };

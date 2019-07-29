@@ -62,16 +62,39 @@ params:
 };
 ```
 
+- Get genres
+```
+/genres - GET
+
+{
+  data: [Genre];
+};
+
+```
+
 - Get average vote of genre
 ```
-/films/statistic - GET
+/genres/update/ - GET
+
+{
+  data: updatedCount Number;
+};
+
+```
+
+
+- Get average vote of genre
+```
+/genre/statistic/:genre - GET
 
 params:
 - genre (strings) *
 
 {
-  data: Number;
+  data: {
+    progress: Number,
+    vote: Number,
+  };
 };
 
-https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
 ```

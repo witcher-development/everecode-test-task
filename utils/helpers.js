@@ -22,3 +22,10 @@ exports.globalErrorHandler = async (error) => {
 	log.error(error);
 	console.log(error);
 };
+
+exports.invalidType = (argument, type, isRequired = false, notEmpty = false) => {
+	if (!isRequired && typeof argument === 'undefined') {
+		return false;
+	}
+	return typeof argument !== type;
+};

@@ -31,9 +31,6 @@ const FullFilmProjection = {
 	id: 0
 };
 
-// const kitty = new Cat({ name: 'Zildjian' });
-// kitty.save().then(() => console.log('meow'));
-
 exports.FilmSchema = FilmSchema;
 exports.FilmModel = Film;
 exports.ShortFilmProjection = ShortFilmProjection;
